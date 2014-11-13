@@ -256,9 +256,9 @@ The following is a possible parse tree for $s$:\\
 \paragraph{Note} The quick introduction to CFGs presented here is certainly far from exhaustive. There are important issues of ambiguity and associativity of operations we have not considered at all so far. However, it should be sufficient to perform the required tasks. If you require more information or are simply interested feel free to look at \url{http://en.wikipedia.org/wiki/Context-free_grammar} and follow references from there.
 
 \section{Helper Code}
-In order for you to focus on implementing the tasks, we are supplying a Java code skeleton which contains the basic functionality for you to start coding. It encapsulates the reading and parsing of the pre-tagged words from the Brown Corpus (see section \ref{sec:bg} and supplies word by word using a \textit{WordHandler} interface.\\
+In order for you to focus on implementing the tasks, we are supplying a Java code skeleton which contains the basic functionality for you to start coding. It encapsulates the reading and parsing of the pre-tagged words from the Brown Corpus (see section \ref{sec:bg}) and supplies word by word using a \textit{WordHandler} interface.\\
 
-There are two main classes that you should know:
+There are three main classes that you should know:
 \begin{description}
 \item[Word] encapsulates the word itself and the POS (verb, noun, adverb, etc)
 
@@ -285,7 +285,7 @@ public class Document {
 \end{lstlisting}
 \end{description}
 
-You are required to create your own \textit{TinySeachEngine} which implements the \textit{TinySearchEngineBase} inteface.
+You are required to create your own \textit{TinySeachEngine} which implements the \textit{TinySearchEngineBase} interface.
 
 \begin{lstlisting}
 public interface TinySearchEngineBase {
@@ -339,25 +339,23 @@ In your main method you need to call \textit{Driver.run} which will starts readi
 
 \paragraph{\textbf{Examples:}}
 \begin{verbatim}
-Building the index done in 47 seconds
+Building the index done in 60 seconds
 Search: 
 \end{verbatim}
 
 As you can see first it prints that the indexing process is done in X seconds, and now on the next line you can enter your search query infront of search and hit enter for example, let's try to search for \textit{nightmare}
 
 \begin{verbatim}
-Building the index done in 47 seconds
+Building the index done in 60 seconds
 Search: nightmare
-got 9 results in 52 microseconds
-ca04
-cc05
-cf09
-cl13
-cl23
-cp16
-cp16
-cp16
-cr04
+got 7 results in 47 microseconds
+Document{ca04, pop=3044066}
+Document{cc05, pop=3045989}
+Document{cf09, pop=3048876}
+Document{cl13, pop=3054667}
+Document{cl23, pop=3054698}
+Document{cp16, pop=3058514}
+Document{cr04, pop=3060403}
 Search: 
 \end{verbatim}
  
@@ -368,10 +366,10 @@ Search:
 \label{ssec:indexing}
 Build the index, your starting point is the insert method. You are allowed to use \emph{Array}s, \emph{ArrayList}s, \emph{LinkedList}s but not \emph{HashMap}s or \emph{TreeMap}s. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.\\
 
-For full points you implementation should allow for finding the documents for a word in $\sim \log n$ where there are $n$ distinct words.
+For full points your implementation should allow for finding the documents for a word in $\sim \log n$ where there are $n$ distinct words.
 
 \subsection{Simple Search -- 20P} 
-Implement the search for a simple query consists of only one word. Given a query ``word'' returns the list of documents that contains ``word''. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.
+Implement the search for a simple query consists of only one word. Given a query ``word'' returns the list of distinct documents that contains ``word''. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.
 
 \subsection{Sorting -- 20P} 
 Implement your own sorting algorithm to sort the resulted documents according to the query description in \ref{sec:queries}. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.

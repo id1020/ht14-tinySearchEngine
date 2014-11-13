@@ -20,6 +20,7 @@ public class DataSource {
     }
 
     private static Document currentDocument;
+    private static int occurrence = 0;
 
     public static void run(final WordHandler handler) throws IOException {
         BrownPosParser parser = new BrownPosParser();
@@ -27,7 +28,8 @@ public class DataSource {
             @Override
             public void handle(Tagging<String> st) {
                 for (int index = 0; index < st.size(); index++) {
-                    handler.handle(new Word(st.token(index).trim(), st.tag(index)), new Attributes(currentDocument, index));
+                    handler.handle(new Word(st.token(index).trim(), st.tag(index)), new Attributes(currentDocument, occurrence));
+                    occurrence++;
                 }
             }
         });
@@ -45,6 +47,7 @@ public class DataSource {
                         InputSource inputSource = new InputSource(DataSource.class.getResourceAsStream("/" + entryName));
                         String docName = entryName.split("/")[1];
                         currentDocument = new Document(docName);
+                        occurrence = 0;
                         parser.parse(inputSource);
                     }
                 }
@@ -56,6 +59,7 @@ public class DataSource {
 
                     String docName = file.getName();
                     currentDocument = new Document(docName);
+                    occurrence = 0;
                     parser.parse(file);
                 }
             }
