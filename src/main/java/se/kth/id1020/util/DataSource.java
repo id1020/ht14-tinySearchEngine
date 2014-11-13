@@ -19,7 +19,7 @@ public class DataSource {
         void handle(Word word, Attributes attr);
     }
 
-    private static String currentDocument;
+    private static Document currentDocument;
 
     public static void run(final WordHandler handler) throws IOException {
         BrownPosParser parser = new BrownPosParser();
@@ -43,7 +43,8 @@ public class DataSource {
                             !entryName.equals("brown/CONTENTS") && !entryName.equals("brown/cats.txt")
                             && !entryName.equals("brown/README")) {
                         InputSource inputSource = new InputSource(DataSource.class.getResourceAsStream("/" + entryName));
-                        currentDocument = entryName.split("/")[1];
+                        String docName = entryName.split("/")[1];
+                        currentDocument = new Document(docName);
                         parser.parse(inputSource);
                     }
                 }
@@ -53,7 +54,8 @@ public class DataSource {
                     if (file.getName().equals("CONTENTS") || file.getName().equals("cats.txt") || file.getName().equals("README"))
                         continue;
 
-                    currentDocument = file.getName();
+                    String docName = file.getName();
+                    currentDocument = new Document(docName);
                     parser.parse(file);
                 }
             }

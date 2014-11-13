@@ -6,7 +6,10 @@ import se.kth.id1020.util.DataSource;
 import se.kth.id1020.util.Word;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import se.kth.id1020.util.Document;
 
 /**
  * Created by Mahmoud Ismail.
@@ -27,13 +30,13 @@ public class Driver {
                 break;
             }
             long t1 = System.nanoTime();
-            String[] res = se.search(query);
+            List<Document> res = se.search(query);
             long e = System.nanoTime() - t1;
             if (res == null) {
-                res = new String[0];
+                res = new ArrayList<Document>();
             }
-            System.out.println("got " + res.length + " results in " + convertnanoTimeToString(e));
-            for (String r : res) {
+            System.out.println("got " + res.size() + " results in " + convertnanoTimeToString(e));
+            for (Document r : res) {
                 System.out.println(r);
             }
         }

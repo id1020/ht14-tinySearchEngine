@@ -5,7 +5,7 @@ import java.util.HashMap;
 /**
  * Created by Mahmoud Ismail.
  */
-public enum WordType {
+public enum PartOfSpeech {
 
     /*
     https://github.com/nltk/nltk/blob/develop/nltk/tag/mapping.py
@@ -512,7 +512,7 @@ public enum WordType {
         put("nr-tl-hl", "noun");
     }};
 
-    public static WordType getType(String tag) {
+    public static PartOfSpeech getType(String tag) {
         String alt = tagsToMeaningfulAlternative.get(tag);
         if (alt.equals("verb")) {
             return VERB;

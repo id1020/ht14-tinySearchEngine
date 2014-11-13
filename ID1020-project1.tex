@@ -136,6 +136,7 @@ The set of common complexity classes is denoted as follows:
 Let $\setofmaps{\N}{\R}$ refer to the set of all functions $f:\N \to \R$ then clearly $\Cx \subseteq \setofmaps{\N}{\R}$.
 
 \section{Background}
+\label{sec:bg}
 The goal of the project is to build a simple search engine for natural language text documents.\\
 When completed the search engine will support the following operations:
 \begin{itemize}
@@ -255,41 +256,49 @@ The following is a possible parse tree for $s$:\\
 \paragraph{Note} The quick introduction to CFGs presented here is certainly far from exhaustive. There are important issues of ambiguity and associativity of operations we have not considered at all so far. However, it should be sufficient to perform the required tasks. If you require more information or are simply interested feel free to look at \url{http://en.wikipedia.org/wiki/Context-free_grammar} and follow references from there.
 
 \section{Helper Code}
-In order for you to focus on implementing the tasks, we are supplying a java code skeleton which contains the basic functionality for you to start coding. It encapsulates the reading and parsing of the pre tagged words from the Brown Corpus and supply word by word using a \textit{WordHandler} interface. There are two main classes that you should know; 
-\begin{itemize}
-\item \textbf{Word} encapsulates the word itself and a wordtype (Verb, Noun, Adverb, ...)
+In order for you to focus on implementing the tasks, we are supplying a Java code skeleton which contains the basic functionality for you to start coding. It encapsulates the reading and parsing of the pre-tagged words from the Brown Corpus (see section \ref{sec:bg} and supplies word by word using a \textit{WordHandler} interface.\\
+
+There are two main classes that you should know:
+\begin{description}
+\item[Word] encapsulates the word itself and the POS (verb, noun, adverb, etc)
 
 \begin{lstlisting}
 public class Word {
-    private final WordType wordType;
-    private final String word;
+    public final PartOfSpeech pos;
+    public final String word;
 }
 \end{lstlisting}
 
-\item \textbf{Attributes} encapsulates the attributes that a word could have; name and popularity of the document in which the word was found, occurrence of the word in that document.
+\item[Attributes] encapsulates the attributes that a word could have: a reference to the document in which the word was found and the occurrence (in number of preceding words) of the word in that document.
 \begin{lstlisting}
 public class Attributes {
-    private final String document;
-    private final int occurrence;
-    private final int popularity;
+    public final Document document;
+    public final int occurrence;
 }
 \end{lstlisting}
-\end{itemize}
+\item[Document] contains the name of the document and the popularity (think ``number of views'').
+\begin{lstlisting}
+public class Document {
+    public final String name;
+    public final int popularity;
+}
+\end{lstlisting}
+\end{description}
 
 You are required to create your own \textit{TinySeachEngine} which implements the \textit{TinySearchEngineBase} inteface.
 
 \begin{lstlisting}
 public interface TinySearchEngineBase {
     //Build the index
-    void insert(Word word, Attributes attr);
+    public void insert(Word word, Attributes attr);
         
-   //Searching
-    String[] search(String query);
+    //Searching
+    public List<Document> search(String query);
 }
 \end{lstlisting}
 
 \paragraph{}
-As shown in the code above, you've only two methods:
+As shown in the code above, you only have two methods:
 \begin{description}
 \item \textbf{insert:} adds the word with the given attribute to your index.
 \item \textbf{search:} returns the list of documents that matches the query.
@@ -305,7 +314,7 @@ First you need to create a maven project and add our helper project as a depende
         <dependency>
             <groupId>se.kth.id1020</groupId>
             <artifactId>tinySearchEngine</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     
@@ -356,13 +365,16 @@ Search:
 \section{Tasks}
 
 \subsection{Indexing -- 30P} 
-Build the index, your starting point is the insert method. You are allowed to use \textit{Arrays}, \textit{ArrayLists}, \textit{LinkedLists} but not \textit{HashMaps} or \textit{TreeMap}s. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
+\label{ssec:indexing}
+Build the index, your starting point is the insert method. You are allowed to use \emph{Array}s, \emph{ArrayList}s, \emph{LinkedList}s but not \emph{HashMap}s or \emph{TreeMap}s. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.\\
+
+For full points you implementation should allow for finding the documents for a word in $\sim \log n$ where there are $n$ distinct words.
 
 \subsection{Simple Search -- 20P} 
-Implement the search for a simple query consists of only one word. Given a query "one word" returns the list of documents that contains that word. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
+Implement the search for a simple query consists of only one word. Given a query ``word'' returns the list of documents that contains ``word''. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.
 
 \subsection{Sorting -- 20P} 
-Implement your own sorting algorithm to sort the resulted documents according to the query description in \ref{sec:queries}. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
+Implement your own sorting algorithm to sort the resulted documents according to the query description in \ref{sec:queries}. You are expected to analyse the complexity of your chosen data structures/algorithms during the oral examination.
 
 \subsection{Queries -- 30P} 
 \label{sec:queries}
@@ -374,10 +386,20 @@ T &\to word &\mbox{ a search term} \\
 T &\to T \ T &\mbox{ union} \\
 Property &\to relevance &\mbox{ how often do the search terms appear in a document?}\\
 Property &\to popularity &\mbox{ how popular is the document?}\\
-Property &\to occurrence &\mbox{ where the search terms appear in a document?}\\
+Property &\to occurrence &\mbox{ where in the document do the search terms appear?}\\
 Direction &\to asc &\mbox{ increasing order}\\
 Direction &\to desc &\mbox{ decreasing order}
 \end{align*}
+
+\paragraph{Note} Do not confuse \emph{union} with \emph{join}! The query ``word1 word2'' should be executed in the following way (or equivalent):
+\begin{enumerate}[1)]
+\item Search for ``word1'' and place results in set $R_1=\{doc_1, doc_2, doc_4\}$
+\item Search for ``word2'' and place results in set $R_2=\{doc_1, doc_3, doc_4\}$
+\item Return $R_1\cup R_2 = \{doc_1, doc_2, doc_3, doc_4\}$
+\end{enumerate}
+
+\paragraph{Tip} While the CFG above describes a very simple query language, make sure that you think your implementation through. In general parsers are a complicated field and you could have almost arbitrarily complicated implementations for this. But a simple and easy to read implementation could simply have one recursive function for each nonterminal that is basically a large switch-statement on the possible terminals of the production rules. Also remember that you will have to tokenise your query before parsing it, that is split it into a stream of tokens, similar to how you get the words from the documents in section \ref{ssec:indexing}. Try to avoid mixing the lexer (generating the token stream) and the parser (generating the parse tree) if possible. You should keep extendibility of your design in mind.\\
+Take a look at \url{https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html} if you need some ideas for the lexer.
 
 
 \end{document}  
