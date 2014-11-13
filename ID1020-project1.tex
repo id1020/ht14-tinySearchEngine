@@ -99,8 +99,8 @@ The project itself is split into two parts, \emph{Project 1 (P1)} and \emph{Proj
 
 \subsection{Dates}
 \begin{description}
-\item[Submission] Wednesday, Dec. 18th, 23:59 in Bilda
-\item[Presentation] Thursday, Dec. 19th, time-slots will be assigned.
+\item[Submission] Wednesday, Dec. 17th, 23:59 in Bilda
+\item[Presentation] Thursday, Dec. 18th, time-slots will be assigned.
 \end{description}
 
 \subsection{Goals}
@@ -254,19 +254,119 @@ The following is a possible parse tree for $s$:\\
 
 \paragraph{Note} The quick introduction to CFGs presented here is certainly far from exhaustive. There are important issues of ambiguity and associativity of operations we have not considered at all so far. However, it should be sufficient to perform the required tasks. If you require more information or are simply interested feel free to look at \url{http://en.wikipedia.org/wiki/Context-free_grammar} and follow references from there.
 
+\section{Helper Code}
+In order for you to focus on implementing the tasks, we are supplying a java code skeleton which contains the basic functionality for you to start coding. It encapsulates the reading and parsing of the pre tagged words from the Brown Corpus and supply word by word using a \textit{WordHandler} interface. There are two main classes that you should know; 
+\begin{itemize}
+\item \textbf{Word} encapsulates the word itself and a wordtype (Verb, Noun, Adverb, ...)
+
+\begin{lstlisting}
+public class Word {
+    private final WordType wordType;
+    private final String word;
+}
+\end{lstlisting}
+
+\item \textbf{Attributes} encapsulates the attributes that a word could have; name and popularity of the document in which the word was found, occurrence of the word in that document.
+\begin{lstlisting}
+public class Attributes {
+    private final String document;
+    private final int occurrence;
+    private final int popularity;
+}
+\end{lstlisting}
+\end{itemize}
+
+You are required to create your own \textit{TinySeachEngine} which implements the \textit{TinySearchEngineBase} inteface.
+
+\begin{lstlisting}
+public interface TinySearchEngineBase {
+    //Build the index
+    void insert(Word word, Attributes attr);
+        
+   //Searching
+    String[] search(String query);
+}
+\end{lstlisting}
+
+\paragraph{}
+As shown in the code above, you've only two methods:
+\begin{description}
+\item \textbf{insert:} adds the word with the given attribute to your index.
+\item \textbf{search:} returns the list of documents that matches the query.
+\end{description}
+
+\newpage
+\subsection{Setup}
+First you need to create a maven project and add our helper project as a dependency in your \textit{pom.xml} as follows:
+
+\begin{lstlisting}[language=XML]
+
+    <dependencies>
+        <dependency>
+            <groupId>se.kth.id1020</groupId>
+            <artifactId>tinySearchEngine</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+    
+    <repositories>
+        <repository>
+            <id>sics-release</id>
+            <name>SICS Release Repository</name>
+            <url>http://kompics.sics.se/maven/repository</url>
+        </repository>
+    </repositories>
+    
+\end{lstlisting}
+
+In your main method you need to call \textit{Driver.run} which will starts reading the documents and will call \textit{insert} in turns to build the index, also it will start a  search REPL "read-eval-print-loop". To exit the REPL you can just write \textit{exit} in front of search.
+
+\begin{lstlisting}
+    public static void main(String[] args) throws Exception{
+        TinySearchEngineBase searchEngine = new TinySearchEngine();
+        Driver.run(searchEngine);
+    }
+\end{lstlisting}
+
+\paragraph{\textbf{Examples:}}
+\begin{verbatim}
+Building the index done in 47 seconds
+Search: 
+\end{verbatim}
+
+As you can see first it prints that the indexing process is done in X seconds, and now on the next line you can enter your search query infront of search and hit enter for example, let's try to search for \textit{nightmare}
+
+\begin{verbatim}
+Building the index done in 47 seconds
+Search: nightmare
+got 9 results in 52 microseconds
+ca04
+cc05
+cf09
+cl13
+cl23
+cp16
+cp16
+cp16
+cr04
+Search: 
+\end{verbatim}
+ 
+ 
 \section{Tasks}
 
-\subsection{Indexing}
-\TODOP{Write description}
+\subsection{Indexing -- 30P} 
+Build the index, your starting point is the insert method. You are allowed to use \textit{Arrays}, \textit{ArrayLists}, \textit{LinkedLists} but not \textit{HashMaps} or \textit{TreeMap}s. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
 
-\subsection{Simple Search}
-\TODOP{Write description}
+\subsection{Simple Search -- 20P} 
+Implement the search for a simple query consists of only one word. Given a query "one word" returns the list of documents that contains that word. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
 
-\subsection{Sorting}
-\TODOP{Write description}
+\subsection{Sorting -- 20P} 
+Implement your own sorting algorithm to sort the resulted documents according to the query description in \ref{sec:queries}. You are expected to analyze the complexity of your chosen data structures/algorithms during the oral examination.
 
-\subsection{Queries}
-Your query language should support \emph{union} and \emph{ordering}. It is described by the following CFG:
+\subsection{Queries -- 30P} 
+\label{sec:queries}
+Implement your own query parser, your query language should support \emph{union} and \emph{ordering} as described by the following CFG:
 \begin{align*}
 E &\to T &\mbox{ simple query}\\
 E &\to T \ orderby \ Property \ Direction &\mbox{ ordering}\\
@@ -274,9 +374,10 @@ T &\to word &\mbox{ a search term} \\
 T &\to T \ T &\mbox{ union} \\
 Property &\to relevance &\mbox{ how often do the search terms appear in a document?}\\
 Property &\to popularity &\mbox{ how popular is the document?}\\
+Property &\to occurrence &\mbox{ where the search terms appear in a document?}\\
 Direction &\to asc &\mbox{ increasing order}\\
 Direction &\to desc &\mbox{ decreasing order}
 \end{align*}
-\TODOP{Write the rest of the description}
+
 
 \end{document}  
