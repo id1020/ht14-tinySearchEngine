@@ -5,7 +5,6 @@ import se.kth.id1020.util.Attributes;
 import se.kth.id1020.util.DataSource;
 import se.kth.id1020.util.Word;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 
@@ -14,34 +13,62 @@ import java.util.Scanner;
  */
 public class Driver {
 
-    static void run(TinySearchEngineBase se) throws IOException{
+    public static void run(TinySearchEngineBase se) throws Exception {
         buildTheIndex(se);
         testTheEngine(se);
     }
 
-    static void testTheEngine(TinySearchEngineBase se) throws IOException{
+    static void testTheEngine(TinySearchEngineBase se) throws IOException {
         In input = new In(new Scanner(System.in));
-        while (true){
+        while (true) {
             System.out.print("Search: ");
-            String query  = input.readLine();
-            if(query.equals("exit")){
+            String query = input.readLine();
+            if (query.equals("exit")) {
                 break;
             }
+            long t1 = System.nanoTime();
             String[] res = se.search(query);
-            for(String r : res){
+            long e = System.nanoTime() - t1;
+            if (res == null) {
+                res = new String[0];
+            }
+            System.out.println("got " + res.length + " results in " + convertnanoTimeToString(e));
+            for (String r : res) {
                 System.out.println(r);
             }
         }
     }
 
-
-    static void buildTheIndex(final TinySearchEngineBase se) throws IOException {
+    static void buildTheIndex(final TinySearchEngineBase se) throws Exception {
+        long t1 = System.nanoTime();
         DataSource.run(new DataSource.WordHandler() {
             @Override
             public void handle(Word word, Attributes attr) {
                 se.insert(word, attr);
             }
         });
+        long e = System.nanoTime() - t1;
+        System.out.println("Building the index done in " + convertnanoTimeToString(e));
     }
 
+
+    static String convertnanoTimeToString(long elapsed) {
+        String time = "";
+        elapsed /= 1000;
+        if(elapsed < 1000){
+            time = elapsed + " microseconds";
+            return time;
+        }
+        elapsed /= 1000;
+        if(elapsed < 1000){
+            time = elapsed + " miliseconds";
+            return time;
+        }
+        elapsed /= 1000;
+        if(elapsed < 1000){
+            time = elapsed + " seconds";
+            return time;
+        }
+        return time;
+    }
 }
