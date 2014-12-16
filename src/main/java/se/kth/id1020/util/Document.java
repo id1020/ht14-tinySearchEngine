@@ -14,9 +14,9 @@ public class Document implements Comparable<Document> {
     public final String name;
     public final int popularity;
 
-    public Document(String name) {
+    public Document(String name, int popularity) {
         this.name = name;
-        this.popularity = Math.abs(name.hashCode());
+        this.popularity = popularity;
     }
 
     @Override

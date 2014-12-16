@@ -1,15 +1,13 @@
 package se.kth.id1020;
 
 import edu.princeton.cs.introcs.In;
-import se.kth.id1020.util.Attributes;
-import se.kth.id1020.util.DataSource;
-import se.kth.id1020.util.Word;
+import se.kth.id1020.util.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import se.kth.id1020.util.Document;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Mahmoud Ismail.
@@ -26,7 +24,7 @@ public class Driver {
         while (true) {
             System.out.print("Search: ");
             String query = input.readLine();
-            if (query.equals("exit")) {
+            if (query.equals("?exit")) {
                 break;
             }
             long t1 = System.nanoTime();
@@ -35,6 +33,7 @@ public class Driver {
             if (res == null) {
                 res = new ArrayList<Document>();
             }
+            System.out.println("Infix: " + se.infix(query));
             System.out.println("got " + res.size() + " results in " + convertnanoTimeToString(e));
             for (Document r : res) {
                 System.out.println(r);
@@ -44,34 +43,29 @@ public class Driver {
 
     static void buildTheIndex(final TinySearchEngineBase se) throws Exception {
         long t1 = System.nanoTime();
-        DataSource.run(new DataSource.WordHandler() {
+        se.preInserts();
+        DataSource.run(new DataSource.SentenceHandler() {
             @Override
-            public void handle(Word word, Attributes attr) {
-                se.insert(word, attr);
+            public void handle(Sentence sentence, Attributes attr) {
+                se.insert(sentence, attr);
             }
         });
+        se.postInserts();
         long e = System.nanoTime() - t1;
         System.out.println("Building the index done in " + convertnanoTimeToString(e));
     }
 
 
     static String convertnanoTimeToString(long elapsed) {
-        String time = "";
-        elapsed /= 1000;
-        if(elapsed < 1000){
-            time = elapsed + " microseconds";
-            return time;
-        }
-        elapsed /= 1000;
-        if(elapsed < 1000){
-            time = elapsed + " miliseconds";
-            return time;
-        }
-        elapsed /= 1000;
-        if(elapsed < 1000){
-            time = elapsed + " seconds";
-            return time;
-        }
-        return time;
+        long min = TimeUnit.MINUTES.convert(elapsed, TimeUnit.NANOSECONDS);
+        long remMin = elapsed - TimeUnit.NANOSECONDS.convert(min, TimeUnit.MINUTES);
+        long sec = TimeUnit.SECONDS.convert(remMin, TimeUnit.NANOSECONDS);
+        long remSec = remMin - TimeUnit.NANOSECONDS.convert(sec, TimeUnit.SECONDS);
+        long milis = TimeUnit.MILLISECONDS.convert(remSec, TimeUnit.NANOSECONDS);
+        long remMilis = remSec - TimeUnit.NANOSECONDS.convert(milis, TimeUnit.MILLISECONDS);
+        long micros = TimeUnit.MICROSECONDS.convert(remMilis, TimeUnit.NANOSECONDS);
+        long remMicros = remMilis - TimeUnit.NANOSECONDS.convert(micros, TimeUnit.MICROSECONDS);
+        
+        return min + "m " + sec + "s " + milis + "ms " + micros + "µs " + remMicros + "ns";
     }
 }

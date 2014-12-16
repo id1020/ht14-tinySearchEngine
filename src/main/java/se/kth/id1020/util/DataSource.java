@@ -2,11 +2,18 @@ package se.kth.id1020.util;
 
 import com.aliasi.corpus.ObjectHandler;
 import com.aliasi.tag.Tagging;
+import com.google.common.primitives.Ints;
 import org.xml.sax.InputSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.CodeSource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -15,22 +22,41 @@ import java.util.zip.ZipInputStream;
  */
 public class DataSource {
 
-    public static interface WordHandler {
-        void handle(Word word, Attributes attr);
+    private final static MessageDigest md;
+    
+    static {
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+    private static int nameToPop(String docName) {
+        md.reset();
+        byte[] hash = md.digest(docName.getBytes(Charset.forName("UTF-8")));
+        int hashi = Ints.fromByteArray(hash);
+        return hashi < 0 ? -hashi : hashi; 
+    }
+
+    public static interface SentenceHandler {
+        void handle(Sentence sentence, Attributes attr);
     }
 
     private static Document currentDocument;
     private static int occurrence = 0;
 
-    public static void run(final WordHandler handler) throws IOException {
+    public static void run(final SentenceHandler handler) throws IOException {
         BrownPosParser parser = new BrownPosParser();
         parser.setHandler(new ObjectHandler<Tagging<String>>() {
             @Override
             public void handle(Tagging<String> st) {
+                Sentence sentence = new Sentence();
                 for (int index = 0; index < st.size(); index++) {
-                    handler.handle(new Word(st.token(index).trim(), st.tag(index)), new Attributes(currentDocument, occurrence));
-                    occurrence++;
+                    sentence.addWord(new Word(st.token(index).trim(), st.tag(index)));
                 }
+                handler.handle(sentence, new Attributes(currentDocument, occurrence));
+                occurrence++;
             }
         });
 
@@ -46,7 +72,7 @@ public class DataSource {
                             && !entryName.equals("brown/README")) {
                         InputSource inputSource = new InputSource(DataSource.class.getResourceAsStream("/" + entryName));
                         String docName = entryName.split("/")[1];
-                        currentDocument = new Document(docName);
+                        currentDocument = new Document(docName, nameToPop(docName));
                         occurrence = 0;
                         parser.parse(inputSource);
                     }
@@ -58,7 +84,7 @@ public class DataSource {
                         continue;
 
                     String docName = file.getName();
-                    currentDocument = new Document(docName);
+                    currentDocument = new Document(docName, nameToPop(docName));
                     occurrence = 0;
                     parser.parse(file);
                 }
@@ -67,13 +93,17 @@ public class DataSource {
     }
 
     public static void main(String[] args) throws IOException {
-        final int wordCount[] = new int[1];
-        run(new WordHandler() {
+        final Map<Document, Integer> d = new HashMap<Document, Integer>();
+        run(new SentenceHandler() {
             @Override
-            public void handle(Word word, Attributes attr) {
-                wordCount[0]++;
+            public void handle(Sentence sentence, Attributes attr) {
+                Integer v = d.get(attr.document);
+                v = v == null ? 0 : v + 1;
+                d.put(attr.document, v);
             }
         });
-        System.out.println(wordCount[0]);
+        List<Integer> val = new ArrayList<Integer>(d.values());
+        Collections.sort(val);
+        System.out.println(val);
     }
 }
